@@ -40,11 +40,16 @@ Array *create_array (int capacity) {
  * Free memory for an array and all of its stored elements
  *****/
 void destroy_array(Array *arr) {
+  printf("in destroy function\n");
+  printf("capacity is %d\n", arr->capacity);
 
   // Free all elements
-  for (int i = 0; i < arr->capacity; i++) {
-    free(arr->elements[i]);
-  }
+  /* for (int i = 0; i < arr->capacity; i++) { */
+  /*   printf("freeing %d\n", i); */
+  /*   printf("%s\n", arr->elements[i]); */
+  /*   free(&arr->elements[i]); */
+  /* } */
+  free(arr->elements);
 
   // Free array
   free(arr);
@@ -88,13 +93,13 @@ void resize_array(Array *arr) {
 char *arr_read(Array *arr, int index) {
 
   // Throw an error if the index is greater or equal to than the current count
-  if (index > arr->count) {
+  if (index >= arr->count) {
     fprintf(stderr, "read: The index is greater than the array's count\n");
     /* exit(1); */
     return NULL;
   } else {
   // Otherwise, return the element at the given index
-    return *(arr->elements + (index * sizeof(char *)));
+    return (arr->elements[index]);
   }
 }
 
@@ -171,10 +176,15 @@ void arr_remove(Array *arr, char *element) {
     for (int i = index; i < arr->count - 1; i++) {
       arr->elements[i] = arr->elements[i + 1];
     }
-    printf("removing %s", arr->elements[arr->count]);
+    /* printf("removing %s", arr->elements[arr->count]); */
     free(arr->elements[arr->count]);
     // Decrement count by 1
     arr->count--;
+    printf("array shuffled: results:\n[");
+    for (int i = 0; i < arr->count; i++) {
+      printf("%s\n", arr->elements[i]);
+    }
+    printf("]\n");
   }
 }
 

@@ -46,9 +46,12 @@ void destroy_array(Array *arr) {
   // Free all elements
   /* for (int i = 0; i < arr->capacity; i++) { */
   /*   printf("freeing %d\n", i); */
-  /*   printf("%s\n", arr->elements[i]); */
-  /*   free(&arr->elements[i]); */
+  /*   /1* printf("%s\n", arr->elements[i]); *1/ */
+  /*   free(arr->elements[i]); */
   /* } */
+
+  /* I'm a bit confused as to why the above for loop causes segfaults. I thought I should have to free each pointer, but it will crash and the tests won't pass.  If I just free arr->elements, as below, it works fine. But why?  */
+
   free(arr->elements);
 
   // Free array
@@ -62,7 +65,7 @@ void destroy_array(Array *arr) {
 void resize_array(Array *arr) {
 
   // Create a new element storage with double capacity
-  char **new_elements = malloc(arr->capacity * 2 * sizeof(char *));
+  char **new_elements = malloc(arr->capacity * 2 * sizeof(char **));
 
   // Copy elements into the new storage
   for (int i = 0; i < arr->capacity; i++) {
@@ -95,7 +98,6 @@ char *arr_read(Array *arr, int index) {
   // Throw an error if the index is greater or equal to than the current count
   if (index >= arr->count) {
     fprintf(stderr, "read: The index is greater than the array's count\n");
-    /* exit(1); */
     return NULL;
   } else {
   // Otherwise, return the element at the given index
@@ -112,7 +114,7 @@ void arr_insert(Array *arr, char *element, int index) {
   // Throw an error if the index is greater than the current count
   if (index > arr->count) {
     fprintf(stderr, "insert: The index is greater than the array's count\n");
-    /* exit(1); */
+    exit(1);
   }
 
   // Resize the array if the number of elements is over capacity
@@ -126,7 +128,9 @@ void arr_insert(Array *arr, char *element, int index) {
   }
 
   // Copy the element and add it to the array
-  arr->elements[index] = element;
+  /* char str[strlen(element) + 1]; */
+  /* strcpy(str, element); */
+  arr->elements[index] = strdup(element);
 
   // Increment count by 1
   arr->count++;
@@ -144,7 +148,9 @@ void arr_append(Array *arr, char *element) {
   }
 
   // Copy the element and add it to the end of the array
-  arr->elements[arr->count] = element;
+  /* char str[strlen(element) + 1]; */
+  /* strcpy(str, element); */
+  arr->elements[arr->count] = strdup(element);
 
   // Increment count by 1
   arr->count++;
@@ -163,21 +169,26 @@ void arr_remove(Array *arr, char *element) {
   // Search for the first occurence of the element and remove it.
   for (int i = 0; i < arr->count; i++) {
     printf("element %d is %s\n", i, arr->elements[i]);
-    if (arr->elements[i] == element) {
+    if (strcmp(arr->elements[i], element) == 0) {
       printf("match found at index %d\n", i);
       index = i;
+      break;
     }
   }
   if (index == -1) {
     fprintf(stderr, "Element not found\n");
   } else {
     // Don't forget to free its memory!
+    /* why would we want to free its memory? we're not decreasing the capacity, right? we just want
+       to remove the element. Shouldn't we just NULL it out? 
+       Oh, I get it. We're not freeing the array, we're freeing the string it points to
+       */
     // Shift over every element after the removed element to the left one position
     for (int i = index; i < arr->count - 1; i++) {
       arr->elements[i] = arr->elements[i + 1];
     }
     /* printf("removing %s", arr->elements[arr->count]); */
-    free(arr->elements[arr->count]);
+    free(arr->elements[arr->count - 1]);
     // Decrement count by 1
     arr->count--;
     printf("array shuffled: results:\n[");
@@ -211,14 +222,19 @@ int main(void)
   Array *arr = create_array(1);
 
   arr_insert(arr, "STRING1", 0);
+  printf("capacity: %d\n", arr->capacity);
   arr_append(arr, "STRING4");
   arr_print(arr);
+  printf("capacity: %d\n", arr->capacity);
   arr_insert(arr, "STRING2", 0);
   arr_print(arr);
+  printf("capacity: %d\n", arr->capacity);
   arr_insert(arr, "STRING3", 1);
   arr_print(arr);
+  printf("capacity: %d\n", arr->capacity);
   arr_remove(arr, "STRING3");
   arr_print(arr);
+  printf("capacity: %d\n", arr->capacity);
 
   destroy_array(arr);
 

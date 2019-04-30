@@ -121,8 +121,6 @@ void arr_insert(Array *arr, char *element, int index) {
   }
 
   // Copy the element and add it to the array
-  /* char str[strlen(element) + 1]; */
-  /* strcpy(str, element); */
   arr->elements[index] = strdup(element);
 
   // Increment count by 1
@@ -141,8 +139,6 @@ void arr_append(Array *arr, char *element) {
   }
 
   // Copy the element and add it to the end of the array
-  /* char str[strlen(element) + 1]; */
-  /* strcpy(str, element); */
   arr->elements[arr->count] = strdup(element);
 
   // Increment count by 1
@@ -161,9 +157,7 @@ void arr_remove(Array *arr, char *element) {
   int index = -1;
   // Search for the first occurence of the element and remove it.
   for (int i = 0; i < arr->count; i++) {
-    /* printf("element %d is %s\n", i, arr->elements[i]); */
     if (strcmp(arr->elements[i], element) == 0) {
-      /* printf("match found at index %d\n", i); */
       index = i;
       break;
     }
@@ -172,30 +166,13 @@ void arr_remove(Array *arr, char *element) {
     fprintf(stderr, "Element not found\n");
   } else {
     // Don't forget to free its memory!
-    /* why would we want to free its memory? we're not decreasing the capacity, right? we just want
-       to remove the element. Shouldn't we just NULL it out? 
-       Oh, I get it. We're not freeing the array, we're freeing the string it points to
-       */
-
-    /* I see (one of) the problem(s) here. We're not copying the strings. We're copying the pointers.
-       So arr->elements[2] will point to the same thing that arr->elements[3] points to.
-       But then we free elements[3], which also frees elements[2].
-       So how do we fix that?
-       */
-
+    free(arr->elements[index]);
     // Shift over every element after the removed element to the left one position
     for (int i = index; i < arr->count - 1; i++) {
       arr->elements[i] = arr->elements[i + 1];
     }
-    /* printf("removing %s", arr->elements[arr->count]); */
-    /* free(arr->elements[arr->count - 1]); */
     // Decrement count by 1
     arr->count--;
-    /* printf("array reshuffled: results:\n["); */
-    /* for (int i = 0; i < arr->count; i++) { */
-    /*   printf("%s\n", arr->elements[i]); */
-    /* } */
-    /* printf("]\n"); */
   }
 }
 
@@ -222,19 +199,11 @@ int main(void)
   Array *arr = create_array(1);
 
   arr_insert(arr, "STRING1", 0);
-  /* printf("capacity: %d\n", arr->capacity); */
   arr_append(arr, "STRING4");
-  /* arr_print(arr); */
-  /* printf("capacity: %d\n", arr->capacity); */
   arr_insert(arr, "STRING2", 0);
-  /* arr_print(arr); */
-  /* printf("capacity: %d\n", arr->capacity); */
   arr_insert(arr, "STRING3", 1);
-  /* arr_print(arr); */
-  /* printf("capacity: %d\n", arr->capacity); */
   arr_remove(arr, "STRING3");
   arr_print(arr);
-  /* printf("capacity: %d\n", arr->capacity); */
 
   destroy_array(arr);
 
